@@ -56,7 +56,7 @@ class ServerProcessTest {
   void aToolCallReachesTheDaemonAndBringsTheReplyBack() throws Exception {
     try (var daemon = new FakeDaemon(200, b -> FakeDaemon.STATUS);
         McpSyncClient c = client(Main.class.getName(), daemon.base().toString(), null)) {
-      assertThat(names(c)).containsExactly("praksis_status");
+      assertThat(names(c)).contains("praksis_status", "praksis_effective", "praksis_verify");
       McpSchema.CallToolResult r = c.callTool(call("praksis_status"));
       assertThat(r.isError()).isFalse();
       assertThat(text(r)).contains("\"rules\":7");
@@ -110,5 +110,29 @@ class ServerProcessTest {
     assertThat(p.waitFor()).isEqualTo(2);
     assertThat(err).contains("PRAKSIS_TOKEN");
     assertThat(out).isEmpty();
+  }
+
+  @Test
+  void theDocumentationAndTheRulesAreResourcesReadFromTheDaemonWhenAsked() throws Exception {
+    String page =
+        it.uhde.praksis.protocol.Wire.encode(
+            new it.uhde.praksis.protocol.Response.HelpPage("user/rules", "Rules", "# Rules"));
+    try (var daemon = new FakeDaemon(200, b -> b.contains("\"help\"") ? page : FakeDaemon.STATUS);
+        McpSyncClient c = client(Main.class.getName(), daemon.base().toString(), null)) {
+      assertThat(c.listResources().resources())
+          .extracting(McpSchema.Resource::uri)
+          .containsExactlyInAnyOrder("praksis://help", "praksis://effective");
+      assertThat(c.listResourceTemplates().resourceTemplates())
+          .extracting(McpSchema.ResourceTemplate::uriTemplate)
+          .containsExactlyInAnyOrder("praksis://help/{page}", "praksis://help/{section}/{page}");
+      // nothing was asked of the daemon by listing
+      assertThat(daemon.seen).isEmpty();
+      var read =
+          c.readResource(
+              McpSchema.ReadResourceRequest.builder("praksis://help/user/rules").build());
+      assertThat(((McpSchema.TextResourceContents) read.contents().get(0)).text())
+          .isEqualTo("# Rules");
+      assertThat(daemon.seen.get(0).body()).isEqualTo("{\"op\":\"help\",\"topic\":\"user/rules\"}");
+    }
   }
 }

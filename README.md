@@ -7,8 +7,19 @@ of the daemon's web API like [Praksis-Web](https://github.com/tuhde/Praksis-Web)
 what the token you give it may do. Approvals, grants, pins, plan runs and layer updates stay with
 you at the daemon, and no tool offers them.
 
-**Status:** skeleton. One tool (`praksis_status`); the read tools, `verify` and the proposal tools
-follow (see `docs/PLAN.md` of Praksis, "MCP server").
+**Status:** the read tools and the resources. Tools: `praksis_status`, `praksis_effective`,
+`praksis_layers`, `praksis_rules_list`, `praksis_rule_read`, `praksis_history_find`,
+`praksis_history_trace`, `praksis_history_summary`, `praksis_log`, `praksis_audit`,
+`praksis_approvals_list`, `praksis_proposals_list`, `praksis_proposal_show`, `praksis_plans_list`,
+`praksis_plan_show`, `praksis_help` and `praksis_verify` (a candidate ruleset, never with the option
+that fetches). Resources: `praksis://help` (the pages), `praksis://help/<page>` and
+`praksis://help/<section>/<page>` (a page in Markdown) and `praksis://effective`. The proposal
+tools, the wrapper for text from outside and the limits follow (see `docs/PLAN.md` of Praksis,
+"MCP server").
+
+The daemon needs the requests `inspect` and `verify` for web tokens, so build it from a commit that
+has them (the core at `ba9bd75` or later). The server waits when it has four requests under way,
+because the daemon answers a ninth request at once of one token with 429.
 
 ## Try it
 

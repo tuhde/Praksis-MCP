@@ -12,6 +12,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.concurrent.Semaphore;
 
 /**
  * One connection to a daemon: {@code POST /api} with a bearer token and one request of the protocol
@@ -20,6 +21,16 @@ import java.time.Duration;
 public final class DaemonClient {
   private final URI endpoint;
   private final String token;
+
+  /**
+   * The daemon lets a token have eight requests at once and answers the rest with 429. An agent may
+   * call tools in parallel, so the calls wait here; four leaves room for another client that uses
+   * the same token.
+   */
+  static final int MAX_AT_ONCE = 4;
+
+  private final Semaphore slots = new Semaphore(MAX_AT_ONCE, true);
+
   private final HttpClient http =
       HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
 
@@ -31,6 +42,12 @@ public final class DaemonClient {
   /** Sends a request; a refusal or an error reply is a {@link DaemonException}. */
   public Response call(Request request) throws DaemonException {
     HttpResponse<String> answer;
+    try {
+      slots.acquire();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new DaemonException("interrupted");
+    }
     try {
       HttpRequest http =
           HttpRequest.newBuilder(endpoint)
@@ -46,6 +63,8 @@ public final class DaemonClient {
       throw new DaemonException("interrupted");
     } catch (IOException | RuntimeException e) {
       throw new DaemonException("cannot reach the daemon at " + endpoint.resolve("/"));
+    } finally {
+      slots.release();
     }
     Response response;
     try {

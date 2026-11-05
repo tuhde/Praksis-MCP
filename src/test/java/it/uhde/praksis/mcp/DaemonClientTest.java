@@ -54,4 +54,23 @@ class DaemonClientTest {
         .message()
         .doesNotContain("pwt_x");
   }
+
+  @Test
+  void parallelCallsWaitForASlotSoThatTheDaemonLimitIsNotReached() throws Exception {
+    try (var daemon = new FakeDaemon(200, b -> FakeDaemon.STATUS)) {
+      daemon.delayMillis = 60;
+      var client = new DaemonClient(daemon.base(), "t");
+      try (var pool = java.util.concurrent.Executors.newFixedThreadPool(16)) {
+        var futures = new java.util.ArrayList<java.util.concurrent.Future<Response>>();
+        for (int i = 0; i < 24; i++) {
+          futures.add(pool.submit(() -> client.call(new Request.Status())));
+        }
+        for (var f : futures) {
+          assertThat(f.get()).isInstanceOf(Response.StatusReport.class);
+        }
+      }
+      assertThat(daemon.seen).hasSize(24);
+      assertThat(daemon.mostAtOnce.get()).isBetween(2, DaemonClient.MAX_AT_ONCE);
+    }
+  }
 }

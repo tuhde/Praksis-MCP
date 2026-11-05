@@ -8,6 +8,8 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /** A listener on loopback that answers every request of the protocol with {@code answer}. */
@@ -15,6 +17,9 @@ final class FakeDaemon implements AutoCloseable {
   record Seen(String authorization, String body) {}
 
   final List<Seen> seen = new CopyOnWriteArrayList<>();
+  final AtomicInteger running = new AtomicInteger();
+  final AtomicInteger mostAtOnce = new AtomicInteger();
+  volatile long delayMillis;
   private final HttpServer server;
   private final int status;
 
@@ -24,15 +29,23 @@ final class FakeDaemon implements AutoCloseable {
     server.createContext(
         "/api",
         exchange -> {
+          mostAtOnce.accumulateAndGet(running.incrementAndGet(), Math::max);
           String body =
               new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
           seen.add(new Seen(exchange.getRequestHeaders().getFirst("Authorization"), body));
+          try {
+            Thread.sleep(delayMillis);
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+          }
+          running.decrementAndGet();
           byte[] out = answer.apply(body).getBytes(StandardCharsets.UTF_8);
           exchange.getResponseHeaders().add("Content-Type", "application/json");
           exchange.sendResponseHeaders(this.status, out.length);
           exchange.getResponseBody().write(out);
           exchange.close();
         });
+    server.setExecutor(Executors.newCachedThreadPool());
     server.start();
   }
 

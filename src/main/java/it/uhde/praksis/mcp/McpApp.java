@@ -34,7 +34,10 @@ public final class McpApp {
     return McpServer.sync(transport)
         .serverInfo(NAME, VERSION)
         .instructions(INSTRUCTIONS)
-        .capabilities(McpSchema.ServerCapabilities.builder().tools(false).build())
+        .capabilities(
+            McpSchema.ServerCapabilities.builder().tools(false).resources(false, false).build())
+        .resources(Resources.fixed(daemon))
+        .resourceTemplates(Resources.templates(daemon))
         .tools(Tools.forMode(all, mode).stream().map(t -> specification(daemon, t)).toList())
         .build();
   }
