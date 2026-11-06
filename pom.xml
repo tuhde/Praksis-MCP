@@ -21,6 +21,7 @@
   <properties>
     <mcp.version>2.1.0</mcp.version>
     <slf4j.version>2.0.17</slf4j.version>
+    <praksis.image>${project.basedir}/../Praksis/praksis-dist/target/praksis</praksis.image>
   </properties>
 
   <dependencies>
@@ -50,6 +51,26 @@
 
   <build>
     <plugins>
+      <!-- The integration tests run the real daemon of the core: build its runtime image first
+           ('./mvnw package' in ../Praksis), or point praksis.image at one. Without an image they
+           are skipped, and say so. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <systemPropertyVariables>
+            <praksis.image>${praksis.image}</praksis.image>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <!-- one runnable jar: java -jar target/praksis-mcp.jar -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

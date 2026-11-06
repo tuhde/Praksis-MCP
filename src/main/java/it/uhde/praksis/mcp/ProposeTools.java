@@ -166,8 +166,8 @@ final class ProposeTools {
     return Tool.of(
         "praksis_notes_save",
         "Leave a note for the person",
-        "Saves a note (an explanation, an answer) that the person reads in the Agent tab or with"
-            + " `praksis agent`. The newest 200 are kept.",
+        "Saves a note (an explanation, an answer) that the person reads in the Agent tab of the"
+            + " desktop program. The newest 200 are kept.",
         PROPOSE,
         properties,
         List.of("title", "text"),

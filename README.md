@@ -66,8 +66,15 @@ protocol.
 ## Tests
 
 `./mvnw verify` runs the tests: the configuration, the client of the daemon against a fake listener,
-the tools by mode (and that no tool is named like an approval or a grant), and the built program in
-its own process spoken to by a real MCP client.
+the tools by mode, the wrapper for text from outside, the list of what the server may ask of the
+daemon, and the built program in its own process spoken to by a real MCP client.
+
+It then runs `LiveDaemonIT` against the **real daemon** of the core: a mail with a hostile subject
+is delivered to a Maildir, and an agent that does what the mail says finds the tool missing, is
+refused by the daemon when its token is read-only, and cannot approve anything; a proposal from a
+token that may make one is kept for the person and audited as `web:<token name>`. It needs the
+runtime image of the core (`./mvnw package` in `../Praksis`, or `-Dpraksis.image=<dir>`); without
+one the test is skipped and says so.
 
 ## License
 
