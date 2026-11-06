@@ -30,6 +30,10 @@ final class ReadTools {
         proposalShow(),
         plans(),
         planShow(),
+        planCatalog(),
+        staged(),
+        stagedShow(),
+        notes(),
         help(),
         verify());
   }
@@ -234,6 +238,48 @@ final class ReadTools {
         props("id", Args.textSchema("the plan id, from praksis_plans_list")),
         List.of("id"),
         (d, a) -> json(d.call(new Request.AgentPlanShow(Args.text(a, "id", true)))));
+  }
+
+  private static Tool planCatalog() {
+    return inspect(
+        "praksis_plan_catalog",
+        "What a plan may contain",
+        "The capabilities that the layer of plans has a grant for, with their parameters and the"
+            + " limits of each grant. A plan step can only use these.",
+        "plan.catalog",
+        Map.of(),
+        List.of());
+  }
+
+  private static Tool staged() {
+    return simple(
+        "praksis_staged_list",
+        "Changes that wait",
+        "Test files and explanations that were staged for the person (by you or by the"
+            + " maintenance agent) and are not applied. The person exports or drops them.",
+        new Request.Staged());
+  }
+
+  private static Tool stagedShow() {
+    return Tool.of(
+        "praksis_staged_show",
+        "One staged change",
+        "A staged change with its files and the checks of the layer with it.",
+        READ,
+        props("id", Args.textSchema("the id, from praksis_staged_list")),
+        List.of("id"),
+        (d, a) -> json(d.call(new Request.StagedShow(Args.text(a, "id", true)))));
+  }
+
+  private static Tool notes() {
+    return Tool.of(
+        "praksis_notes_list",
+        "Notes for the person",
+        "The notes that the agent left for the person (explanations, answers), newest first.",
+        READ,
+        props("limit", Args.intSchema("how many at most", 1, 100)),
+        List.of(),
+        (d, a) -> json(d.call(new Request.Notes(Args.integer(a, "limit", 20, 1, 100)))));
   }
 
   private static Tool help() {

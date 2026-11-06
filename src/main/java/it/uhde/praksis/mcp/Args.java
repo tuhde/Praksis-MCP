@@ -54,10 +54,12 @@ final class Args {
    * Checks the given arguments against the properties of a schema (type, and range for whole
    * numbers) and refuses names that are not in it. Nothing is sent before this has passed.
    */
-  static void validate(Map<String, Object> properties, Map<String, Object> args)
+  static void validate(Map<String, Object> properties, Map<String, Object> args, String... also)
       throws DaemonException {
+    java.util.Set<String> known = new java.util.HashSet<>(properties.keySet());
+    known.addAll(java.util.List.of(also));
     for (String key : args.keySet()) {
-      if (!properties.containsKey(key)) {
+      if (!known.contains(key)) {
         throw new DaemonException("unknown argument '" + key + "'");
       }
     }

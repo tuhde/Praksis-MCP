@@ -49,7 +49,12 @@ public final class McpApp {
             .description(tool.description())
             .annotations(
                 new McpSchema.ToolAnnotations(
-                    tool.title(), tool.kind() == Tool.Kind.READ, null, null, null, false))
+                    tool.title(),
+                    tool.kind() == Tool.Kind.READ,
+                    false,
+                    tool.kind() == Tool.Kind.READ ? null : false,
+                    null,
+                    false))
             .build();
     return SyncToolSpecification.builder()
         .tool(description)

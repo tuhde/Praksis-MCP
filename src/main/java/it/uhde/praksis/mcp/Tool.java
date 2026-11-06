@@ -9,9 +9,13 @@ import java.util.Map;
  * as a JSON schema, and the code that asks the daemon.
  */
 public interface Tool {
-  /** What a tool does to the daemon: {@code READ} only looks, {@code COMMAND} starts something. */
+  /**
+   * What a tool does to the daemon: {@code READ} only looks, {@code PROPOSE} hands the person
+   * something to look at (nothing is applied, run or granted), {@code COMMAND} starts something.
+   */
   enum Kind {
     READ,
+    PROPOSE,
     COMMAND
   }
 

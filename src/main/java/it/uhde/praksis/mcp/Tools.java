@@ -32,11 +32,21 @@ public final class Tools {
 
   /** The tools, all modes together. */
   public static List<Tool> catalog() {
-    return ReadTools.all();
+    List<Tool> all = new java.util.ArrayList<>(ReadTools.all());
+    all.addAll(ProposeTools.all());
+    return List.copyOf(all);
   }
 
-  /** The tools that a mode offers: read-only offers the tools that look. */
+  /** The tools that a mode offers; each mode offers those of the modes before it. */
   public static List<Tool> forMode(List<Tool> all, Mode mode) {
-    return all.stream().filter(t -> t.kind() == Tool.Kind.READ || mode == Mode.COMMANDS).toList();
+    return all.stream().filter(t -> offered(t.kind(), mode)).toList();
+  }
+
+  static boolean offered(Tool.Kind kind, Mode mode) {
+    return switch (kind) {
+      case READ -> true;
+      case PROPOSE -> mode == Mode.PROPOSE || mode == Mode.COMMANDS;
+      case COMMAND -> mode == Mode.COMMANDS;
+    };
   }
 }

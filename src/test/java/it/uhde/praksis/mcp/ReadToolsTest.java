@@ -28,8 +28,9 @@ class ReadToolsTest {
 
   @Test
   void everyToolOfTheCatalogLooksOnly() {
-    assertThat(Tools.catalog()).isNotEmpty().allMatch(t -> t.kind() == Tool.Kind.READ);
-    assertThat(Tools.catalog())
+    List<Tool> reading = Tools.forMode(Tools.catalog(), Mode.READ_ONLY);
+    assertThat(reading).hasSizeGreaterThan(15).allMatch(t -> t.kind() == Tool.Kind.READ);
+    assertThat(reading)
         .extracting(Tool::name)
         .contains(
             "praksis_status",
@@ -53,6 +54,13 @@ class ReadToolsTest {
     assertThat(sent("praksis_approvals_list", Map.of())).isEqualTo("{\"op\":\"approvals\"}");
     assertThat(sent("praksis_proposals_list", Map.of())).isEqualTo("{\"op\":\"proposals\"}");
     assertThat(sent("praksis_plans_list", Map.of())).isEqualTo("{\"op\":\"agent-plans\"}");
+    assertThat(sent("praksis_staged_list", Map.of())).isEqualTo("{\"op\":\"staged\"}");
+    assertThat(sent("praksis_staged_show", Map.of("id", "s1")))
+        .isEqualTo("{\"op\":\"staged-show\",\"id\":\"s1\"}");
+    assertThat(sent("praksis_notes_list", Map.of("limit", 3)))
+        .isEqualTo("{\"op\":\"notes\",\"limit\":3}");
+    assertThat(sent("praksis_plan_catalog", Map.of()))
+        .isEqualTo("{\"op\":\"inspect\",\"what\":\"plan.catalog\",\"args\":{}}");
     assertThat(sent("praksis_audit", Map.of("limit", 5)))
         .isEqualTo("{\"op\":\"audit\",\"limit\":5}");
     assertThat(sent("praksis_audit", Map.of())).isEqualTo("{\"op\":\"audit\",\"limit\":50}");

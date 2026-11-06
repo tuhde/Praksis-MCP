@@ -24,6 +24,8 @@ class ConfigTest {
   void readsTheMode() {
     assertThat(Config.from(Map.of("PRAKSIS_TOKEN", "t", "PRAKSIS_MODE", "commands")).mode())
         .isEqualTo(Mode.COMMANDS);
+    assertThat(Config.from(Map.of("PRAKSIS_TOKEN", "t", "PRAKSIS_MODE", "propose")).mode())
+        .isEqualTo(Mode.PROPOSE);
     assertThatThrownBy(() -> Config.from(Map.of("PRAKSIS_TOKEN", "t", "PRAKSIS_MODE", "all")))
         .hasMessageContaining("PRAKSIS_MODE");
   }

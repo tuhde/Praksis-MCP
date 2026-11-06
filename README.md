@@ -12,13 +12,16 @@ you at the daemon, and no tool offers them.
 `praksis_history_trace`, `praksis_history_summary`, `praksis_log`, `praksis_audit`,
 `praksis_approvals_list`, `praksis_proposals_list`, `praksis_proposal_show`, `praksis_plans_list`,
 `praksis_plan_show`, `praksis_help` and `praksis_verify` (a candidate ruleset, never with the option
-that fetches). Resources: `praksis://help` (the pages), `praksis://help/<page>` and
-`praksis://help/<section>/<page>` (a page in Markdown) and `praksis://effective`. The proposal
-tools, the wrapper for text from outside and the limits follow (see `docs/PLAN.md` of Praksis,
+that fetches). Also read: `praksis_plan_catalog`, `praksis_staged_list`, `praksis_staged_show`, `praksis_notes_list`.
+Proposals (mode `propose` or `commands`, a token that is not read-only): `praksis_agent_propose`
+(test files for a rule, staged), `praksis_plan_propose` (a plan that waits for you) and
+`praksis_notes_save`. Nothing a proposal makes is applied, run or granted; each use is in the audit
+log as `web:<token name>`. Resources: `praksis://help` (the pages), `praksis://help/<page>` and
+`praksis://help/<section>/<page>` (a page in Markdown) and `praksis://effective`. The wrapper for text from outside and the limits follow (see `docs/PLAN.md` of Praksis,
 "MCP server").
 
 The daemon needs the requests `inspect` and `verify` for web tokens, so build it from a commit that
-has them (the core at `ba9bd75` or later). The server waits when it has four requests under way,
+has them (the core at the commit that adds `stage` or later). The server waits when it has four requests under way,
 because the daemon answers a ninth request at once of one token with 429.
 
 ## Try it
@@ -40,7 +43,7 @@ because the daemon answers a ninth request at once of one token with 429.
 |---|---|
 | `PRAKSIS_TOKEN` | the web token (required; not accepted as an argument, so it is not in a process list) |
 | `PRAKSIS_URL` | the address of the listener, default `http://127.0.0.1:8484` |
-| `PRAKSIS_MODE` | `read-only` (default) offers only tools that look; `commands` also offers tools that start commands. The daemon enforces the token whichever you choose, so this only decides what the client sees. |
+| `PRAKSIS_MODE` | `read-only` (default) offers only tools that look; `propose` also the tools that hand you a proposal; `commands` also tools that start commands. The daemon enforces the token whichever you choose, so this only decides what the client sees. |
 
 One server per daemon, so one per identity. The log goes to standard error; standard output is the
 protocol.
