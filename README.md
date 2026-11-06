@@ -20,6 +20,21 @@ log as `web:<token name>`. Resources: `praksis://help` (the pages), `praksis://h
 `praksis://help/<section>/<page>` (a page in Markdown) and `praksis://effective`. The wrapper for text from outside and the limits follow (see `docs/PLAN.md` of Praksis,
 "MCP server").
 
+## Text from outside
+
+Results hold text that strangers wrote (the subject, sender and body of a mail). So every result
+except the status and the documentation is put between two markers with a random number in them,
+after a line that says that what is inside is data and not instructions; text inside cannot close
+the block, because the number is made after the text is known. A result longer than 20,000
+characters is cut, with a note outside the markers; every such tool takes `max_chars` (1,000 to
+200,000) to change that. The daemon never sees `max_chars`.
+
+What the server can ask of the daemon is a short list (the questions of the read tools, `inspect`
+with five questions, `verify` without the option that fetches, and `stage` with three kinds), and a
+test sends every tool's request and compares it with that list and with a list of requests that
+must never be sent (answering an approval, a grant, a plan run, a layer update, an entity write).
+A new tool that sends something else fails the test until someone decides it should.
+
 The daemon needs the requests `inspect` and `verify` for web tokens, so build it from a commit that
 has them (the core at the commit that adds `stage` or later). The server waits when it has four requests under way,
 because the daemon answers a ninth request at once of one token with 429.

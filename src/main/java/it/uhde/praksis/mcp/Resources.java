@@ -38,14 +38,19 @@ final class Resources {
         new SyncResourceSpecification(
             McpSchema.Resource.builder(EFFECTIVE, "effective")
                 .title("The rules in use")
-                .description("Every rule of the ruleset in use with the layer it comes from.")
-                .mimeType("application/json")
+                .description(
+                    "Every rule of the ruleset in use with the layer it comes from, as data between"
+                        + " markers.")
+                .mimeType("text/plain")
                 .build(),
             (exchange, request) ->
                 read(
                     request.uri(),
-                    "application/json",
-                    () -> DaemonClient.json(daemon.call(new Request.Effective())))));
+                    "text/plain",
+                    () ->
+                        Untrusted.wrap(
+                            DaemonClient.json(daemon.call(new Request.Effective())),
+                            Untrusted.DEFAULT_MAX))));
   }
 
   static List<SyncResourceTemplateSpecification> templates(DaemonClient daemon) {
