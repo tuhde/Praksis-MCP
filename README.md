@@ -39,6 +39,9 @@ The daemon needs the requests `inspect` and `verify` for web tokens, so build it
 has them (the core at the commit that adds `stage` or later). The server waits when it has four requests under way,
 because the daemon answers a ninth request at once of one token with 429.
 
+The full guide (tokens, modes, what an agent can and cannot do) is the page "Letting an agent use
+Praksis (MCP)" in the documentation of Praksis, `docs/user/mcp.md`.
+
 ## Try it
 
 1. Turn on the web listener of the daemon (`[web] listen = "127.0.0.1:8484"` in `praksis.toml`) and
